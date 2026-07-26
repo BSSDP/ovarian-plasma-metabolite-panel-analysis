@@ -9,4 +9,4 @@
 - Environment specifications, script manifest and release checksums.
 - Public-release metadata, citation file, MIT source-code licence and privacy
   audit record.
-
+- Zenodo archival DOI: https://doi.org/10.5281/zenodo.21594513.

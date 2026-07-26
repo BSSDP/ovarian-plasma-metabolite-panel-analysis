@@ -2,6 +2,8 @@
 
 Fixed public release: `v1.0.0`
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21594513.svg)](https://doi.org/10.5281/zenodo.21594513)
+
 This repository contains the analysis and figure-generation code for the
 manuscript **From untargeted discovery to a targeted plasma metabolite panel
 for ovarian tumour malignancy assessment**. It is organised as a fixed,
@@ -69,8 +71,9 @@ modifying source data.
 
 `CODE_PACKAGE_MANIFEST.tsv` lists the script-to-analysis mapping.
 `RELEASE_MANIFEST.sha256` records checksums for every package file. Cite the
-manuscript and the Zenodo DOI associated with this fixed release;
-`CITATION.cff` provides repository metadata.
+manuscript and fixed-release DOI
+[`10.5281/zenodo.21594513`](https://doi.org/10.5281/zenodo.21594513);
+`CITATION.cff` provides version-specific repository metadata.
 
 ## Licence
 

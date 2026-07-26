@@ -1,0 +1,20 @@
+R package requirements used by the R scripts:
+
+- tidyverse
+- data.table
+- readxl
+- writexl
+- ggplot2
+- ggrepel
+- patchwork
+- pheatmap
+- ComplexHeatmap
+- circlize
+- mixOmics
+- vegan
+- uwot
+- clusterProfiler
+- org.Hs.eg.db
+- survival
+- survminer
+

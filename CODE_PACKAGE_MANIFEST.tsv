@@ -1,0 +1,37 @@
+package_path	analysis_component	provenance_note
+scripts/lcms_preprocessing_qc/02_metabolomics_qc_and_overview_Fig2combined_revised_split_panels.R	LC-MS preprocessing and QC overview	Derived from the project LC-MS QC/overview analysis scripts.
+scripts/lcms_preprocessing_qc/03A_global_plsda_umap_permanova.R	Global ordination and PERMANOVA	Derived from the project global ordination analysis scripts.
+scripts/lcms_preprocessing_qc/03_b_pairwise_diff_analysis_merged_only_multivolcano.R	Pairwise differential LC-MS analysis	Derived from the project pairwise differential LC-MS analysis scripts.
+scripts/lcms_preprocessing_qc/01_make_qc_stability_figure.py	Targeted assay QC stability figure	Derived from the targeted assay QC analysis scripts.
+scripts/lcms_preprocessing_qc/01_make_standard_curve_figures.py	Targeted standard-curve analysis and figures	Derived from the targeted standard-curve analysis scripts.
+scripts/lcms_preprocessing_qc/01_make_xic_figures.py	Targeted XIC figure generation	Derived from the targeted XIC figure-generation scripts.
+scripts/model_a_discovery_screening/load_and_use_model.py	Discovery N-vs-M model usage	Derived from the discovery-model analysis scripts.
+scripts/model_a_discovery_screening/MODEL_USAGE_GUIDE.md	Discovery model usage guide	Derived from the discovery-model documentation.
+scripts/model_b_ca125_plus_analyte/run_ModelB_CA125_8analyte_nested_cv.py	CA125-plus-analyte nested CV	Derived from the CA125-plus-analyte modelling scripts.
+scripts/model_b_ca125_plus_analyte/evaluate_ModelB_optimized_ensemble.py	CA125-plus-analyte optimized ensemble evaluation	Derived from the CA125-plus-analyte modelling scripts.
+scripts/model_b_ca125_plus_analyte/plot_ModelB_CA125_8analyte_publication.py	CA125-plus-analyte figure generation	Derived from the CA125-plus-analyte figure-generation scripts.
+scripts/model_c_targeted_panel/train_ModelC_nested_independent.py	Targeted-panel scoring, nested development and independent validation	Derived from the targeted-panel modelling scripts.
+scripts/model_c_targeted_panel/plot_ModelC_nested_independent_publication.py	Targeted-panel publication figure generation	Derived from the targeted-panel figure-generation scripts.
+scripts/single_cell_scrna/GSE217517_01_load.py	Single-cell data loading	Derived from the public single-cell preprocessing scripts.
+scripts/single_cell_scrna/GSE217517_02_analysis.py	Single-cell QC and dimensional reduction	Derived from the public single-cell preprocessing scripts.
+scripts/single_cell_scrna/GSE217517_04b_cnv_inference.py	CNV scoring and tumour-like epithelial-cell assignment	Derived from the public single-cell CNV-inference scripts.
+scripts/single_cell_scrna/GSE217517_04_annotation.py	Single-cell cell-type annotation	Derived from the public single-cell annotation scripts.
+scripts/scfea/01_prepare_scfea_inputs.py	scFEA epithelial-cell input preparation	Derived from the scFEA input-preparation scripts.
+scripts/scfea/02_run_scfea.py	scFEA flux execution	Derived from the scFEA execution scripts.
+scripts/scfea/03_analyze_scfea_results.py	scFEA module-wide downstream analysis	Derived from the scFEA downstream-analysis scripts.
+scripts/scfea/06_make_focused_scfea_figures.py	scFEA focused figure generation	Derived from the scFEA figure-generation scripts.
+scripts/public_omics_cptac_tcga/TCGA_00_run_publication_support.R	TCGA-OV GATM publication support	Derived from the TCGA-OV public-omics support scripts.
+scripts/public_omics_cptac_tcga/run_cptac_ov_tumor_vs_normal_kegg.py	CPTAC-OV proteomic pathway analysis	Derived from the CPTAC-OV public-omics support scripts.
+scripts/public_omics_cptac_tcga/export_individual_target_boxplots.py	CPTAC target-pathway figure generation	Derived from the CPTAC-OV figure-generation scripts.
+scripts/figure_generation/01_make_targeted_measurement_clinical_figures.py	Targeted measurement and clinical association figures	Derived from the targeted measurement and clinical association figure scripts.
+scripts/figure_generation/04_redraw_kegg_editable.py	KEGG figure redraw	Derived from the KEGG figure-redraw scripts.
+scripts/figure_generation/05_redraw_Fig2_volcano_heatmap_publication.py	Volcano and heatmap publication redraw	Derived from the volcano and heatmap figure-redraw scripts.
+scripts/figure_generation/build_eight_analyte_mrm_transition_mirror.py	Targeted MRM transition evidence figure generation	Derived from the targeted MRM transition-evidence figure scripts.
+scripts/figure_generation/build_mrm_evidence_composite.py	Targeted MRM evidence composite figure generation	Derived from the targeted MRM evidence composite figure scripts.
+scripts/model_a_discovery_screening/train_ModelA_nested_cv.py	Current manuscript release	Discovery N-vs-M nested model development and age-residualization sensitivity analysis.
+scripts/model_a_discovery_screening/plot_ModelA_three_view_ensemble_publication.py	Current manuscript release	Discovery N-vs-M ensemble publication figures, including age-residualized stability panel.
+scripts/model_c_targeted_panel/train_ModelC_nested_independent_current.py	Current manuscript release	Current targeted-panel nested development, fixed score and temporal validation workflow.
+scripts/model_c_targeted_panel/plot_ModelC_nested_independent_publication_current.py	Current manuscript release	Current targeted-panel publication figures, including age-residualized sensitivity panel.
+scripts/model_c_targeted_panel/run_targeted_panel_score_CA125_lesion_triage.py	Current manuscript release	Exploratory targeted-panel-score plus CA125 benign/borderline versus malignant lesion analysis.
+scripts/model_c_targeted_panel/plot_targeted_panel_score_CA125_lesion_triage.py	Current manuscript release	Publication-ready figures for targeted-panel-score plus CA125 lesion triage.
+processed_input_examples/README.md	Public release input specification	Required input classes and controlled-access boundaries; no participant-level inputs are distributed in this repository.

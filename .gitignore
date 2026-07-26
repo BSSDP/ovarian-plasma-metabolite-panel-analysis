@@ -1,0 +1,27 @@
+# Python and R runtime files
+__pycache__/
+*.py[cod]
+.Rhistory
+.RData
+.Rproj.user/
+
+# Local environments and editor settings
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Rebuilt analysis outputs and temporary files
+results/
+figures/
+tmp/
+*.log
+*.tmp
+
+# Restricted or raw inputs
+data_raw/
+raw_data/
+clinical_identifiable/
+*.raw
+*.wiff
+*.d

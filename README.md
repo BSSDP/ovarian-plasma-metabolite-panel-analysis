@@ -1,12 +1,12 @@
-# From untargeted discovery to a targeted plasma metabolite panel for ovarian tumour malignancy assessment
+# Machine-learning-guided development and temporal validation of a targeted plasma metabolite panel for ovarian cancer detection
 
 Fixed public release: `v1.0.0`
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21594513.svg)](https://doi.org/10.5281/zenodo.21594513)
 
 This repository contains the analysis and figure-generation code for the
-manuscript **From untargeted discovery to a targeted plasma metabolite panel
-for ovarian tumour malignancy assessment**. It is organised as a fixed,
+manuscript **Machine-learning-guided development and temporal validation of a
+targeted plasma metabolite panel for ovarian cancer detection**. It is organised as a fixed,
 auditable public release for GitHub deposit at
 `https://github.com/BSSDP/ovarian-plasma-metabolite-panel-analysis` and Zenodo
 archival.

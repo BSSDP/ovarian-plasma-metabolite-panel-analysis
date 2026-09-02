@@ -23,7 +23,7 @@ OUT = SCRIPT_DIR.parent
 ANALYSIS_REQUESTED = OUT.parent
 TARGET_ROOT = ANALYSIS_REQUESTED.parent
 ROOT = TARGET_ROOT.parent
-STYLE_DIR = ROOT / "00_project_style"
+STYLE_DIR = Path(__file__).resolve().parents[2] / "00_project_style"
 if str(STYLE_DIR) not in sys.path:
     sys.path.insert(0, str(STYLE_DIR))
 from ov_publication_style import (
@@ -61,8 +61,8 @@ GROUP3_PALETTE = {
     "Malignant tumours": GROUP_COLORS["M"],
 }
 COHORT_DISPLAY_LABELS = {
-    "Batch1": "exploratory cohort",
-    "Batch2": "independent validation cohort",
+    "Batch1": "discovery cohort",
+    "Batch2": "temporal same-centre validation cohort",
 }
 
 
@@ -277,7 +277,7 @@ def read_sources() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 def build_integrated_dataset(long: pd.DataFrame, score: pd.DataFrame, clinical: pd.DataFrame) -> pd.DataFrame:
     score = score.copy()
     score["sample_id_norm"] = score["Sample Name"].map(norm_id)
-    score["cohort_role"] = np.where(score["batch_display"].eq("Batch1"), "exploratory cohort", "independent validation cohort")
+    score["cohort_role"] = np.where(score["batch_display"].eq("Batch1"), "discovery cohort", "temporal same-centre validation cohort")
     score["three_group_display"] = score["group_display"].map({"N": "Normal controls", "B": "Benign/borderline lesions", "BD": "Benign/borderline lesions", "M": "Malignant tumours"})
 
     clinical = standardize_targeted_clinical_table(clinical)
@@ -306,7 +306,7 @@ def plot_01_effect_size() -> None:
     order = effects.groupby("Component Label")["log2FC_M_minus_N"].mean().sort_values().index.tolist()
     fig, ax = plt.subplots(figsize=(8.2, 5.4))
     offsets = {"Batch1": -0.16, "Batch2": 0.16}
-    colors = {"Batch1": COHORT_COLORS["Exploratory cohort"], "Batch2": COHORT_COLORS["Independent validation cohort"]}
+    colors = {"Batch1": COHORT_COLORS["Discovery cohort"], "Batch2": COHORT_COLORS["Temporal same-centre validation cohort"]}
     ybase = np.arange(len(order))
     for batch in ["Batch1", "Batch2"]:
         sub = effects[effects["batch_display"] == batch].set_index("Component Label").reindex(order).reset_index()
@@ -367,7 +367,7 @@ def plot_03_plsda() -> None:
 
 
 def plot_05_clinical_correlation(df: pd.DataFrame) -> None:
-    sub = df[df["cohort_role"].eq("exploratory cohort")].copy()
+    sub = df[df["cohort_role"].eq("discovery cohort")].copy()
     rows = []
     targets = ANALYTES + ["NvsM_model_score"]
     continuous_vars = ["CA125", "HE4"]
@@ -488,7 +488,7 @@ def audit_full_batch1_clinical_fields(df: pd.DataFrame) -> None:
 
 
 def categorical_clinical_tests(df: pd.DataFrame) -> None:
-    sub = df[df["cohort_role"].eq("exploratory cohort")].copy()
+    sub = df[df["cohort_role"].eq("discovery cohort")].copy()
     targets = ANALYTES + ["NvsM_model_score"]
     factors = ["group_display", "stage_binary", "stage_group", "pathology_class", "pathology_subtype_abbr"]
     rows = []
@@ -528,7 +528,7 @@ def categorical_clinical_tests(df: pd.DataFrame) -> None:
 
 
 def plot_06_analyte_pfs(df: pd.DataFrame) -> None:
-    sub = df[(df["cohort_role"].eq("exploratory cohort")) & (df["group_display"].eq("M"))].copy()
+    sub = df[(df["cohort_role"].eq("discovery cohort")) & (df["group_display"].eq("M"))].copy()
     rows = []
     for y in ANALYTES:
         cox = cox_univariable(sub["pfs_time"], sub["pfs_event"], sub[y])
@@ -571,7 +571,7 @@ def plot_07_score_gradient(df: pd.DataFrame) -> None:
 
 
 def plot_06_score_pfs(df: pd.DataFrame) -> None:
-    sub = df[(df["cohort_role"].eq("exploratory cohort")) & (df["group_display"].eq("M"))].copy()
+    sub = df[(df["cohort_role"].eq("discovery cohort")) & (df["group_display"].eq("M"))].copy()
     cox = cox_univariable(sub["pfs_time"], sub["pfs_event"], sub["NvsM_model_score"])
     tmp = sub[["pfs_time", "pfs_event", "NvsM_model_score"]].dropna()
     lr_p = np.nan

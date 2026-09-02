@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 PROJECT = Path(os.environ.get("OV_PROJECT_ROOT", Path(__file__).resolve().parents[3]))
-LOCAL_PACKAGES = PROJECT / ".codex_py314_pkgs"
+LOCAL_PACKAGES = PROJECT / ".local_python_packages"
 if LOCAL_PACKAGES.exists():
     sys.path.insert(0, str(LOCAL_PACKAGES))
 sys.path.append(str(PROJECT / "11_trarget" / "readable_raw" / "python_pkgs"))

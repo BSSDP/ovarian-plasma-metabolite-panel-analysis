@@ -11,4 +11,6 @@ removing participant-level processed inputs and other restricted materials.
 4. `RELEASE_MANIFEST.sha256` records checksums for the fixed public release.
 5. The confidential peer-review archive remains separate and must not be
    overwritten by, or redistributed as, this public release.
-
+6. `Supplementary Software 1.zip` must be generated directly from the signed
+   or annotated `v1.0.1` tag so that the submitted archive, GitHub release and
+   Zenodo record contain the same fixed files.

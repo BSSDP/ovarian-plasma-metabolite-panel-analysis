@@ -1,5 +1,15 @@
 # Release notes
 
+## v1.0.1 (fixed public release, 2026-09-02)
+
+- Removed absolute local style paths and bundled the publication style needed
+  by public figure scripts.
+- Standardised reader-facing cohort labels to discovery cohort and temporal
+  same-centre validation cohort without changing model inputs, scores,
+  thresholds or numerical results.
+- Refreshed release metadata, privacy checks and file-level checksums.
+- Zenodo concept DOI: https://doi.org/10.5281/zenodo.21594512.
+
 ## v1.0.0 (fixed public release, 2026-07-26)
 
 - Fixed manuscript-associated analysis and figure-generation scripts.

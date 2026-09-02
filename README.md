@@ -1,8 +1,8 @@
 # Machine-learning-guided development and temporal validation of a targeted plasma metabolite panel for ovarian cancer detection
 
-Fixed public release: `v1.0.0`
+Fixed public release: `v1.0.1`
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21594513.svg)](https://doi.org/10.5281/zenodo.21594513)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21594512.svg)](https://doi.org/10.5281/zenodo.21594512)
 
 This repository contains the analysis and figure-generation code for the
 manuscript **Machine-learning-guided development and temporal validation of a
@@ -55,6 +55,15 @@ full runtime may additionally be reconstructed from the supplied specifications.
 Where data paths differ, configure an authorised project mirror rather than
 modifying source data.
 
+Shared plotting styles are bundled in `00_project_style` and
+`scripts/style`. Set `OV_PROJECT_ROOT` for scripts that operate in an
+authorised project mirror, and optionally set `OV_PUBLICATION_STYLE` for R
+scripts when using an alternative style file. Legacy filenames and internal
+keys containing terms such as `independent` or `locked` are retained only for
+backward compatibility; manuscript-facing outputs use *discovery cohort*,
+*temporal same-centre validation cohort*, *finalised model* and *fixed
+threshold*.
+
 ## Reproducing the core models
 
 1. Create the Python environment from `environment.yml` or `requirements.txt`;
@@ -72,8 +81,9 @@ modifying source data.
 `CODE_PACKAGE_MANIFEST.tsv` lists the script-to-analysis mapping.
 `RELEASE_MANIFEST.sha256` records checksums for every package file. Cite the
 manuscript and fixed-release DOI
-[`10.5281/zenodo.21594513`](https://doi.org/10.5281/zenodo.21594513);
-`CITATION.cff` provides version-specific repository metadata.
+[`10.5281/zenodo.21594512`](https://doi.org/10.5281/zenodo.21594512);
+`CITATION.cff` provides release metadata; the cited concept DOI resolves to
+the latest archived version.
 
 ## Licence
 

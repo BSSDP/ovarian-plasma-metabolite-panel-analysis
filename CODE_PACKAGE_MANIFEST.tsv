@@ -10,7 +10,7 @@ scripts/model_a_discovery_screening/MODEL_USAGE_GUIDE.md	Discovery model usage g
 scripts/model_b_ca125_plus_analyte/run_ModelB_CA125_8analyte_nested_cv.py	CA125-plus-analyte nested CV	Derived from the CA125-plus-analyte modelling scripts.
 scripts/model_b_ca125_plus_analyte/evaluate_ModelB_optimized_ensemble.py	CA125-plus-analyte optimized ensemble evaluation	Derived from the CA125-plus-analyte modelling scripts.
 scripts/model_b_ca125_plus_analyte/plot_ModelB_CA125_8analyte_publication.py	CA125-plus-analyte figure generation	Derived from the CA125-plus-analyte figure-generation scripts.
-scripts/model_c_targeted_panel/train_ModelC_nested_independent.py	Targeted-panel scoring, nested development and independent validation	Derived from the targeted-panel modelling scripts.
+scripts/model_c_targeted_panel/train_ModelC_nested_independent.py	Targeted-panel scoring, nested development and temporal same-centre validation	Derived from the targeted-panel modelling scripts; the legacy filename is retained for compatibility.
 scripts/model_c_targeted_panel/plot_ModelC_nested_independent_publication.py	Targeted-panel publication figure generation	Derived from the targeted-panel figure-generation scripts.
 scripts/single_cell_scrna/GSE217517_01_load.py	Single-cell data loading	Derived from the public single-cell preprocessing scripts.
 scripts/single_cell_scrna/GSE217517_02_analysis.py	Single-cell QC and dimensional reduction	Derived from the public single-cell preprocessing scripts.

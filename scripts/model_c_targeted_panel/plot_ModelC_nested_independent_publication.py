@@ -44,8 +44,8 @@ TRAIN = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(TRAIN)
 
-DEV_LABEL = "Exploratory cohort (outer OOF)"
-VAL_LABEL = "Independent validation cohort"
+DEV_LABEL = "Discovery cohort (outer OOF)"
+VAL_LABEL = "Temporal same-centre validation cohort"
 DEV_COLOR = "#9E9E9E"
 VAL_COLOR = SIGNAL_RED
 
@@ -305,7 +305,7 @@ def main():
     (ROOT / "ModelC_publication_figure_QA.md").write_text(
         "# ModelC publication figure QA\n\n"
         "- Figures 01-10 were regenerated from the nested-development and frozen-validation outputs.\n"
-        "- Figure 02 and Figure 07 compare exploratory-cohort outer OOF results with the independent validation cohort.\n"
+        "- Figure 02 and Figure 07 compare discovery-cohort outer OOF results with the temporal same-centre validation cohort.\n"
         "- Independent validation data were not used for model or threshold selection.\n"
         "- 98figure was not updated.\n",
         encoding="utf-8",

@@ -43,15 +43,17 @@ comparison_list <- list(
 )
 group_levels <- c("N", "B", "BD", "M")
 style_candidates <- c(
-  "D:/xwdata/OVdatarewrite/00_project_style/ov_publication_style.R",
-  file.path(dirname(getwd()), "00_project_style", "ov_publication_style.R"),
-  file.path(dirname(dirname(getwd())), "00_project_style", "ov_publication_style.R")
+  Sys.getenv("OV_PUBLICATION_STYLE", unset = NA_character_),
+  file.path(dirname(normalizePath(sub("^--file=", "", grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)[1]), winslash = "/", mustWork = FALSE)), "..", "style", "ov_publication_style.R"),
+  file.path(getwd(), "scripts", "style", "ov_publication_style.R"),
+  file.path(dirname(getwd()), "scripts", "style", "ov_publication_style.R")
 )
+style_candidates <- style_candidates[!is.na(style_candidates) & nzchar(style_candidates)]
 style_file <- style_candidates[file.exists(style_candidates)][1]
-if (file.exists(style_file)) {
+if (!is.na(style_file) && file.exists(style_file)) {
   source(style_file)
 } else {
-  stop("Missing project style file")
+  stop("Missing ov_publication_style.R. Use the bundled scripts/style file or set OV_PUBLICATION_STYLE.")
 }
 group_palette <- OV_GROUP_COLORS[group_levels]
 comparison_strip_palette <- c(

@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite the associated manuscript and the archived software release."
 title: "From untargeted discovery to a targeted plasma metabolite panel for ovarian tumour malignancy assessment"
-version: 1.0.0
-date-released: 2026-07-26
+version: 1.0.1
+date-released: 2026-09-02
 type: software
 authors:
   - family-names: Xiao
@@ -11,5 +11,5 @@ authors:
     given-names: Dian
 license: MIT
 repository-code: "https://github.com/BSSDP/ovarian-plasma-metabolite-panel-analysis"
-doi: "10.5281/zenodo.21594513"
+doi: "10.5281/zenodo.21594512"
 abstract: "Reproducible analysis and figure-generation code for a plasma metabolomics study of ovarian tumour malignancy assessment."

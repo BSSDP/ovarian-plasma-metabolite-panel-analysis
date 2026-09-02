@@ -1,6 +1,6 @@
 # Public-release privacy audit
 
-Release assessed: `v1.0.0`, 2026-07-26
+Release assessed: `v1.0.1`, 2026-09-02
 
 ## Included
 
@@ -27,7 +27,7 @@ Release assessed: `v1.0.0`, 2026-07-26
   retained in the public release;
 - no direct participant identifiers, contact details or local project paths were
   retained in the public release; and
-- Python source files were syntax-compiled after release preparation.
+- Python source files were parsed for syntax after release preparation.
 
 The separate confidential peer-review package is retained for editorial review
 and is not part of this public GitHub or Zenodo release.

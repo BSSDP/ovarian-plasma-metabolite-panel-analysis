@@ -1,4 +1,4 @@
-# Machine-learning-guided development and temporal validation of a targeted plasma metabolite panel for ovarian cancer detection
+# Machine-learning-guided development and temporal validation of a targeted plasma metabolite panel for preoperative ovarian malignancy assessment
 
 Fixed public release: `v1.0.1`
 

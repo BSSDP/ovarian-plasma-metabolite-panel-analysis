@@ -6,7 +6,8 @@ Fixed public release: `v1.0.1`
 
 This repository contains the analysis and figure-generation code for the
 manuscript **Machine-learning-guided development and temporal validation of a
-targeted plasma metabolite panel for ovarian cancer detection**. It is organised as a fixed,
+targeted plasma metabolite panel for preoperative ovarian malignancy
+assessment**. It is organised as a fixed,
 auditable public release for GitHub deposit at
 `https://github.com/BSSDP/ovarian-plasma-metabolite-panel-analysis` and Zenodo
 archival.

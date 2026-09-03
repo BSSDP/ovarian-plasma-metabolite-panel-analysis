@@ -1,6 +1,6 @@
 # Release notes
 
-## v1.0.1 (fixed public release, 2026-09-02)
+## v1.0.1 (fixed public release, 2026-09-03)
 
 - Removed absolute local style paths and bundled the publication style needed
   by public figure scripts.

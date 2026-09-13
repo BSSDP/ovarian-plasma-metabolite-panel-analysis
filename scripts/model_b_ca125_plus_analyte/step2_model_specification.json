@@ -1,0 +1,41 @@
+{
+  "analysis": "Step 2 benign versus borderline-or-malignant lesion triage",
+  "evidence_tier": "exploratory clinical-application analysis",
+  "author_confirmed_timing": "Model specification was finalised using the development cohort before evaluation in the temporally separated cohort.",
+  "positive_class": [
+    "BD",
+    "M"
+  ],
+  "negative_class": [
+    "B"
+  ],
+  "predictors": [
+    "log10(CA125)",
+    "3-GPA",
+    "Acetylcarnitine",
+    "Creatine",
+    "Arginine",
+    "Carnitine",
+    "Tryptophan"
+  ],
+  "model": "L2-regularised logistic regression",
+  "C": 0.01,
+  "class_weight": "balanced",
+  "preprocessing": [
+    "fold-specific median imputation",
+    "fold-specific standardisation"
+  ],
+  "development_resampling": "20 repeats of stratified five-fold out-of-fold prediction",
+  "development_participant_probability": "mean of 20 held-out probabilities",
+  "temporal_validation_probability": "mean probability from 100 fixed development-fold models",
+  "threshold": 0.4779920056448391,
+  "threshold_source": "averaged development out-of-fold probabilities only",
+  "threshold_rule": "Correctly classify at least one additional BD+M participant and one additional benign participant relative to CA125 at 35 U/mL; then use accuracy, F1, specificity and the higher threshold as deterministic tie-breakers.",
+  "validation_use_prohibition": [
+    "feature selection",
+    "model fitting",
+    "hyperparameter tuning",
+    "threshold selection",
+    "threshold re-optimisation"
+  ]
+}

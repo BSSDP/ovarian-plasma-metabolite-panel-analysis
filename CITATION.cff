@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite the associated manuscript and the archived software release."
 title: "Machine-learning-guided development and temporal validation of a targeted plasma metabolite panel for preoperative ovarian malignancy assessment"
-version: 1.0.1
-date-released: 2026-09-03
+version: 1.1.0
+date-released: 2026-09-13
 type: software
 authors:
   - family-names: Xiao

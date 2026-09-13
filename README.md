@@ -1,6 +1,6 @@
 # Machine-learning-guided development and temporal validation of a targeted plasma metabolite panel for preoperative ovarian malignancy assessment
 
-Fixed public release: `v1.0.1`
+Fixed public release: `v1.1.0`
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21594512.svg)](https://doi.org/10.5281/zenodo.21594512)
 
@@ -18,8 +18,8 @@ The package covers untargeted LC-MS preprocessing and QC, feature-level
 differential analysis, discovery normal-control versus malignant-tumour model
 development, targeted MRM panel development, fixed-score temporal validation,
 normal-control-derived age-residualization sensitivity analyses, exploratory
-targeted-panel-score plus CA125 lesion triage, single-cell/scFEA analyses, and
-CPTAC/TCGA public-omics support.
+six-analyte-plus-CA125 lesion triage, sample-level single-cell pathway analyses,
+scFEA analyses, and CPTAC/TCGA public-omics support.
 
 ## Data access and execution boundary
 
@@ -44,9 +44,12 @@ repository.
 The manuscript-targeted score is the **weighted probability ensemble** recorded
 in the current targeted-panel outputs and Supplementary Table 6. The current
 scripts added in this release supersede earlier exploratory variants retained in
-the historical package. Use the current scripts whose filenames end in
-`_current.py` or refer to the targeted-panel-score plus CA125 lesion-triage
-workflow.
+the Git history. The Step 2 clinical-application model uses six targeted analytes
+plus CA125 for benign-versus-borderline-or-malignant lesion triage. Its endpoint,
+predictors, regularisation strength and threshold rule are fixed in
+`scripts/model_b_ca125_plus_analyte/run_two_step_clinical_application_current.py`.
+The sample-level pathway and scFEA scripts use seven clinically annotated cancer
+samples for the paired GSE184880 analyses.
 
 ## Environment
 

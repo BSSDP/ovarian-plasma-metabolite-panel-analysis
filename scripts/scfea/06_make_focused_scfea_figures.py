@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import sys
+import argparse
 import os
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -139,6 +140,17 @@ def p_label(p: float) -> str:
     return f"P = {p:.3f}"
 
 
+def bh_adjust(p_values: pd.Series) -> pd.Series:
+    values = p_values.to_numpy(dtype=float)
+    order = np.argsort(values)
+    ranked = values[order]
+    adjusted = ranked * len(values) / np.arange(1, len(values) + 1)
+    adjusted = np.minimum.accumulate(adjusted[::-1])[::-1]
+    result = np.empty_like(adjusted)
+    result[order] = np.minimum(adjusted, 1.0)
+    return pd.Series(result, index=p_values.index)
+
+
 def _decode(values) -> list[str]:
     out = []
     for value in values:
@@ -207,6 +219,31 @@ def load_dataset(dataset: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame
     return meta, flux, balance
 
 
+def read_scfea_input_genes(
+    dataset: str, meta: pd.DataFrame, genes: tuple[str, ...] = ("GATM", "GAMT")
+) -> tuple[pd.DataFrame, str]:
+    input_path = (
+        DATASETS[dataset]["input_dir"] / f"{dataset}_epithelial_scFEA_counts.csv"
+    )
+    counts = pd.read_csv(input_path, index_col=0)
+    missing_genes = sorted(set(genes) - set(counts.index))
+    if missing_genes:
+        raise ValueError(f"{dataset}: genes missing from scFEA input: {missing_genes}")
+    missing_cells = meta.index.difference(counts.columns)
+    if len(missing_cells):
+        raise ValueError(
+            f"{dataset}: {len(missing_cells)} epithelial cells missing from scFEA input"
+        )
+
+    values = counts.loc[list(genes), meta.index].T.astype(float)
+    if float(counts.to_numpy().max()) > 30:
+        values = np.log2(values + 1.0)
+        transform = "scFEA input log2(count + 1)"
+    else:
+        transform = "scFEA input count (no internal log transform)"
+    return values, transform
+
+
 def sample_state_values(meta: pd.DataFrame, values: pd.Series, require_paired: bool = True) -> pd.DataFrame:
     tmp = meta[["sample", "state"]].copy()
     tmp["value"] = values.loc[meta.index].astype(float)
@@ -214,6 +251,62 @@ def sample_state_values(meta: pd.DataFrame, values: pd.Series, require_paired: b
     if require_paired:
         return wide.dropna(subset=["Normal-like", "Tumour-like"])
     return wide
+
+
+def paired_analysis_metadata(dataset: str, meta: pd.DataFrame) -> pd.DataFrame:
+    """Return the prespecified samples used for paired scFEA inference.
+
+    GSE217517 contains tumour-cohort samples only. For GSE184880, paired
+    tumour-like versus normal-like epithelial-state inference is restricted to
+    the seven clinically annotated cancer samples, matching the pathway-level
+    sample definition and excluding CNV-high cells detected in a normal sample.
+    """
+    if dataset != "GSE184880":
+        return meta
+    if "group" not in meta.columns:
+        raise KeyError("GSE184880 metadata requires a group column for cancer-sample restriction")
+    restricted = meta.loc[meta["group"].astype(str).eq("Tumor")].copy()
+    if restricted.empty:
+        raise ValueError("GSE184880 cancer-sample restriction produced no epithelial cells")
+    return restricted
+
+
+def write_paired_sample_manifest() -> Path:
+    rows = []
+    for dataset in DATASETS:
+        meta, _, _ = load_dataset(dataset)
+        paired_meta = paired_analysis_metadata(dataset, meta)
+        states = (
+            paired_meta[["sample", "state"]]
+            .drop_duplicates()
+            .groupby("sample", observed=True)["state"]
+            .agg(lambda values: set(values))
+        )
+        paired_samples = states[
+            states.map(lambda values: {"Normal-like", "Tumour-like"}.issubset(values))
+        ].index
+        for sample in paired_samples:
+            sample_meta = paired_meta.loc[paired_meta["sample"].eq(sample)]
+            clinical_group = (
+                str(sample_meta["group"].iloc[0])
+                if "group" in sample_meta.columns
+                else "Tumour cohort"
+            )
+            rows.append(
+                {
+                    "dataset": dataset,
+                    "sample": sample,
+                    "clinical_group": clinical_group,
+                    "inclusion_rule": (
+                        "clinically annotated cancer sample with both CNV-defined epithelial states"
+                        if dataset == "GSE184880"
+                        else "tumour-cohort sample with both CNV-defined epithelial states"
+                    ),
+                }
+            )
+    manifest_path = OUT / "focused_scFEA_paired_sample_ids.tsv"
+    pd.DataFrame(rows).to_csv(manifest_path, sep="\t", index=False)
+    return manifest_path
 
 
 def compare_sample_states(sample_wide: pd.DataFrame, paired: bool) -> tuple[dict, np.ndarray, np.ndarray, pd.DataFrame]:
@@ -526,18 +619,38 @@ def save_umap_figure(fig, stem: Path) -> None:
         fig.savefig(stem.with_suffix(f".{ext}"), **kwargs)
 
 
-def make_three_metric_split_violin(dataset: str) -> pd.DataFrame:
+def make_five_metric_split_violin(dataset: str) -> pd.DataFrame:
     meta, flux, balance = load_dataset(dataset)
+    gene_expression, gene_scale = read_scfea_input_genes(dataset, meta)
+    paired_meta = paired_analysis_metadata(dataset, meta)
     metric_values = {
-        "Arginine\nbalance": balance["Arginine"],
-        "Arginine-creatine\naxis score": arginine_creatine_axis_score(flux),
-        "M19 GATM/GAMT\nmodule": flux["M_19"],
+        "Arginine\nbalance": {
+            "values": balance["Arginine"],
+            "source": "scFEA metabolite-balance output",
+        },
+        "Arginine-creatine\naxis score": {
+            "values": arginine_creatine_axis_score(flux),
+            "source": "mean Z-score across predefined scFEA flux modules",
+        },
+        "M19 GATM/GAMT\nmodule": {
+            "values": flux["M_19"],
+            "source": "scFEA M_19 inferred flux",
+        },
+        "GATM\nexpression": {
+            "values": gene_expression["GATM"],
+            "source": gene_scale,
+        },
+        "GAMT\nexpression": {
+            "values": gene_expression["GAMT"],
+            "source": gene_scale,
+        },
     }
 
     rows = []
     plot_rows = []
-    for label, values in metric_values.items():
-        sample_wide = sample_state_values(meta, values, require_paired=True)
+    for label, metric_config in metric_values.items():
+        values = metric_config["values"]
+        sample_wide = sample_state_values(paired_meta, values, require_paired=True)
         compare_stats, _, _, complete = compare_sample_states(sample_wide, paired=True)
         stacked = sample_wide[["Normal-like", "Tumour-like"]].stack().dropna()
         sd = float(stacked.std(ddof=0))
@@ -549,6 +662,7 @@ def make_three_metric_split_violin(dataset: str) -> pd.DataFrame:
             {
                 "dataset": dataset,
                 "metric": label.replace("\n", " "),
+                "value_source": metric_config["source"],
                 "comparison_level": "sample-level paired",
                 "test": compare_stats["test"],
                 "display_scale": "sample-state Z-score",
@@ -567,15 +681,26 @@ def make_three_metric_split_violin(dataset: str) -> pd.DataFrame:
             plot_rows.append({"sample": sample, "metric": label, "state": "Tumour-like", "z": float(row["Tumour-like"])})
 
     plot_df = pd.DataFrame(plot_rows)
+    plot_df.insert(0, "dataset", dataset)
+    plot_df["metric"] = plot_df["metric"].str.replace("\n", " ", regex=False)
+    plot_df.to_csv(
+        OUT / f"{dataset}_focused_scFEA_five_metric_display_values.tsv",
+        sep="\t",
+        index=False,
+    )
     stats_df = pd.DataFrame(rows)
+    stats_df["fdr_bh_within_dataset_five_metrics"] = bh_adjust(
+        stats_df["p_value"]
+    )
 
-    fig, ax = plt.subplots(figsize=(6.2, 3.1))
+    fig, ax = plt.subplots(figsize=(8.2, 3.25))
     categories = list(metric_values.keys())
     positions = np.arange(len(categories), dtype=float)
     rng = np.random.default_rng(20260616)
     for x, label in zip(positions, categories):
-        normal = plot_df.loc[(plot_df["metric"] == label) & (plot_df["state"] == "Normal-like"), "z"].to_numpy(dtype=float)
-        tumour = plot_df.loc[(plot_df["metric"] == label) & (plot_df["state"] == "Tumour-like"), "z"].to_numpy(dtype=float)
+        display_label = label.replace("\n", " ")
+        normal = plot_df.loc[(plot_df["metric"] == display_label) & (plot_df["state"] == "Normal-like"), "z"].to_numpy(dtype=float)
+        tumour = plot_df.loc[(plot_df["metric"] == display_label) & (plot_df["state"] == "Tumour-like"), "z"].to_numpy(dtype=float)
         for values, side, color in [(normal, "left", SIGNAL_BLUE), (tumour, "right", SIGNAL_RED)]:
             parts = ax.violinplot(
                 values,
@@ -617,9 +742,9 @@ def make_three_metric_split_violin(dataset: str) -> pd.DataFrame:
             whiskerprops={"linewidth": 0.5, "color": TEXT_DARK},
             capprops={"linewidth": 0.5, "color": TEXT_DARK},
         )
-        for sample in plot_df.loc[plot_df["metric"] == label, "sample"].unique():
-            n_value = plot_df.loc[(plot_df["metric"] == label) & (plot_df["sample"] == sample) & (plot_df["state"] == "Normal-like"), "z"].iloc[0]
-            t_value = plot_df.loc[(plot_df["metric"] == label) & (plot_df["sample"] == sample) & (plot_df["state"] == "Tumour-like"), "z"].iloc[0]
+        for sample in plot_df.loc[plot_df["metric"] == display_label, "sample"].unique():
+            n_value = plot_df.loc[(plot_df["metric"] == display_label) & (plot_df["sample"] == sample) & (plot_df["state"] == "Normal-like"), "z"].iloc[0]
+            t_value = plot_df.loc[(plot_df["metric"] == display_label) & (plot_df["sample"] == sample) & (plot_df["state"] == "Tumour-like"), "z"].iloc[0]
             ax.plot([x - 0.12, x + 0.12], [n_value, t_value], color="#9E9E9E", linewidth=0.38, alpha=0.55, zorder=1)
         ax.scatter(np.full(len(normal), x - 0.12) + rng.normal(0, 0.018, len(normal)), normal, s=10, color=SIGNAL_BLUE, edgecolor="white", linewidth=0.22, zorder=3)
         ax.scatter(np.full(len(tumour), x + 0.12) + rng.normal(0, 0.018, len(tumour)), tumour, s=10, color=SIGNAL_RED, edgecolor="white", linewidth=0.22, zorder=3)
@@ -634,7 +759,10 @@ def make_three_metric_split_violin(dataset: str) -> pd.DataFrame:
     ax.set_xticks(positions)
     ax.set_xticklabels(categories)
     ax.set_ylabel("Sample-level Z-score")
-    comparison_label = "paired sample-state comparison (n=8)"
+    paired_counts = stats_df["n_paired_samples"].drop_duplicates().tolist()
+    if len(paired_counts) != 1:
+        raise AssertionError(f"{dataset}: inconsistent paired sample counts across metrics: {paired_counts}")
+    comparison_label = f"paired sample-state comparison (n={int(paired_counts[0])})"
     ax.set_title(f"{dataset} scFEA focused metrics", loc="left", fontsize=8.6, fontweight="bold", pad=4)
     ax.text(0.99, 1.02, comparison_label, transform=ax.transAxes, ha="right", va="bottom", fontsize=6.4, color="#666666")
     ax.scatter([], [], s=18, color=SIGNAL_BLUE, label="Normal-like")
@@ -643,7 +771,13 @@ def make_three_metric_split_violin(dataset: str) -> pd.DataFrame:
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.tight_layout()
-    save_publication_figure(fig, FIG / f"{dataset}_scFEA_three_metric_split_violin", width=6.2, height=3.1)
+    # Preserve the established file stem used by the manuscript assembly.
+    save_publication_figure(
+        fig,
+        FIG / f"{dataset}_scFEA_three_metric_split_violin",
+        width=8.2,
+        height=3.25,
+    )
     plt.close(fig)
 
     return stats_df
@@ -791,18 +925,80 @@ def make_overview_figure() -> pd.DataFrame:
     return overview
 
 
+def write_five_metric_split_violin_outputs() -> tuple[pd.DataFrame, Path, Path]:
+    split_violin_stats = pd.concat(
+        [make_five_metric_split_violin(dataset) for dataset in DATASETS],
+        ignore_index=True,
+    )
+    split_violin_stats_path = (
+        OUT / "focused_scFEA_five_metric_split_violin_statistics.tsv"
+    )
+    legacy_split_violin_stats_path = (
+        OUT / "focused_scFEA_three_metric_split_violin_statistics.tsv"
+    )
+    split_violin_stats.to_csv(split_violin_stats_path, sep="\t", index=False)
+    split_violin_stats.to_csv(
+        legacy_split_violin_stats_path, sep="\t", index=False
+    )
+
+    manifest_path = OUT / "focused_scFEA_display_manifest.tsv"
+    if manifest_path.exists():
+        manifest = pd.read_csv(manifest_path, sep="\t")
+        for dataset in DATASETS:
+            stem = f"{dataset}_scFEA_three_metric_split_violin"
+            mask = manifest["file_stem"].eq(stem)
+            purpose = (
+                "combined split half-violin view of five "
+                f"{dataset} sample-level scFEA metrics, including GATM and GAMT expression"
+            )
+            if mask.any():
+                manifest.loc[mask, "purpose"] = purpose
+            else:
+                manifest = pd.concat(
+                    [
+                        manifest,
+                        pd.DataFrame([{"file_stem": stem, "purpose": purpose}]),
+                    ],
+                    ignore_index=True,
+                )
+        manifest.to_csv(manifest_path, sep="\t", index=False)
+
+    focused_qa = [
+        "# Five-metric sample-paired scFEA display",
+        "",
+        "The established three_metric figure file stems are retained for manuscript compatibility.",
+        "Each figure now displays five sample-paired metrics: arginine balance, arginine-creatine axis score, M19 inferred flux, GATM expression and GAMT expression.",
+        "GATM and GAMT are read from the exact epithelial scFEA count inputs and transformed using the internal scFEA rule, log2(count + 1).",
+        "For every metric, epithelial-cell values are averaged within sample and state before two-sided paired Wilcoxon signed-rank testing.",
+        "GSE184880 inference is restricted to the seven clinically annotated cancer samples containing both CNV-defined epithelial states; GSE217517 uses its eight tumour-cohort samples.",
+        "The plotted scale is a within-metric Z-score of the paired sample-state means within each dataset; statistical tests use the unscaled sample-state means.",
+        "",
+        f"Canonical statistics: {split_violin_stats_path.name}",
+        f"Compatibility statistics: {legacy_split_violin_stats_path.name}",
+    ]
+    (OUT / "focused_scFEA_five_metric_split_violin_QA.md").write_text(
+        "\n".join(focused_qa), encoding="utf-8"
+    )
+    return (
+        split_violin_stats,
+        split_violin_stats_path,
+        legacy_split_violin_stats_path,
+    )
+
+
 def main() -> None:
+    paired_sample_manifest = write_paired_sample_manifest()
     rows = []
     axis_rows = []
-    split_violin_rows = []
     for dataset in DATASETS:
         dataset_rows, dataset_axis_rows = make_dataset_figures(dataset)
         rows.extend(dataset_rows)
         axis_rows.extend(dataset_axis_rows)
-        split_violin_rows.append(make_three_metric_split_violin(dataset))
-    split_violin_stats = pd.concat(split_violin_rows, ignore_index=True)
-    split_violin_stats_path = OUT / "focused_scFEA_three_metric_split_violin_statistics.tsv"
-    split_violin_stats.to_csv(split_violin_stats_path, sep="\t", index=False)
+    (
+        split_violin_stats,
+        split_violin_stats_path,
+        legacy_split_violin_stats_path,
+    ) = write_five_metric_split_violin_outputs()
     stats = pd.DataFrame(rows)
     stats_path = OUT / "focused_scFEA_Arginine_M19_display_statistics.tsv"
     stats.to_csv(stats_path, sep="\t", index=False)
@@ -813,32 +1009,36 @@ def main() -> None:
         [
             {"file_stem": "GSE217517_Arginine_balance_UMAP", "purpose": "Arginine balance epithelial-cell UMAP overlay"},
             {"file_stem": "GSE217517_M19_GATM_GAMT_module_UMAP", "purpose": "M19 GATM/GAMT epithelial-cell UMAP overlay"},
-            {"file_stem": "GSE217517_scFEA_three_metric_split_violin", "purpose": "combined split half-violin view of three GSE217517 sample-level scFEA metrics"},
+            {"file_stem": "GSE217517_scFEA_three_metric_split_violin", "purpose": "combined split half-violin view of five GSE217517 sample-level scFEA metrics, including GATM and GAMT expression"},
             {"file_stem": "GSE184880_Arginine_balance_UMAP", "purpose": "Arginine balance epithelial-cell UMAP overlay"},
             {"file_stem": "GSE184880_M19_GATM_GAMT_module_UMAP", "purpose": "M19 GATM/GAMT epithelial-cell UMAP overlay"},
-            {"file_stem": "GSE184880_scFEA_three_metric_split_violin", "purpose": "combined split half-violin view of three GSE184880 sample-level scFEA metrics"},
+            {"file_stem": "GSE184880_scFEA_three_metric_split_violin", "purpose": "combined split half-violin view of five GSE184880 sample-level scFEA metrics, including GATM and GAMT expression"},
         ]
     )
     manifest.to_csv(OUT / "focused_scFEA_display_manifest.tsv", sep="\t", index=False)
 
     qa = [
-        "# Focused scFEA axis-score and GATM-expression update",
+        "# Focused scFEA five-metric sample-paired update",
         "",
-        "No scFEA neural-network inference was rerun. This update reuses existing epithelial-cell flux matrices, metabolite-balance matrices, metadata and source h5ad expression matrices.",
+        "No scFEA neural-network inference was rerun. This update reuses existing epithelial-cell flux matrices, metabolite-balance matrices, metadata and the exact epithelial scFEA count inputs.",
         "",
         "## Arginine/proline/creatine axis score",
         "",
         f"Predefined modules: {', '.join(ARG_CREATINE_AXIS_MODULES)}.",
         "For each dataset, each module was Z-scored across all epithelial cells, and the axis score was calculated as the mean Z-score across the predefined modules. Statistical testing used paired sample-level normal-like versus tumour-like mean scores.",
         "",
-        "## GATM expression",
+        "## GATM and GAMT expression",
         "",
-        "GATM single-gene expression plots are intentionally not generated in the focused display because tumour-like versus normal-like epithelial expression direction is not consistent across the two datasets. GSE217517 has higher cell-level rank/detection in tumour-like cells, whereas GSE184880 does not support tumour-like upregulation at the cell-level expression distribution. Keep GATM as part of the M19 GATM/GAMT module only if discussing the predefined arginine-creatine axis.",
+        "GATM and GAMT use the exact scFEA epithelial count inputs and mirror the internal scFEA transformation, log2(count + 1). Expression was averaged within each sample and epithelial state before paired Wilcoxon testing. Both genes were higher in tumour-like epithelial cells in both datasets under this sample-paired analysis.",
+        "",
+        "The split half-violin figures now contain five metrics: arginine balance, arginine-creatine axis score, M19 inferred flux, GATM expression and GAMT expression. The established three_metric file stem is retained for manuscript compatibility.",
         "",
         "## Output tables",
         "",
         f"- {axis_stats_path.name}",
         f"- {split_violin_stats_path.name}",
+        f"- {legacy_split_violin_stats_path.name} (compatibility copy)",
+        f"- {paired_sample_manifest.name}",
         "- focused_scFEA_display_manifest.tsv",
     ]
     (OUT / "focused_scFEA_axis_score_and_GATM_violin_QA.md").write_text("\n".join(qa), encoding="utf-8")
@@ -850,4 +1050,17 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--five-metric-only",
+        action="store_true",
+        help="Update only the five-metric paired split-violin figures and tables.",
+    )
+    args = parser.parse_args()
+    if args.five_metric_only:
+        split_stats, split_path, _ = write_five_metric_split_violin_outputs()
+        print(f"Wrote split violin rows: {len(split_stats)}")
+        print(f"Wrote statistics: {split_path}")
+        print(f"Wrote figures to: {FIG}")
+    else:
+        main()

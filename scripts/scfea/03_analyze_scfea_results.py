@@ -265,7 +265,15 @@ def load_dataset(dataset: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         index_col=0,
     )
     common = meta.index.intersection(flux.index)
-    return flux.loc[common], meta.loc[common]
+    flux = flux.loc[common]
+    meta = meta.loc[common]
+    if dataset == "GSE184880":
+        if "group" not in meta.columns:
+            raise KeyError("GSE184880 metadata requires a group column for cancer-sample restriction")
+        keep = meta["group"].astype(str).eq("Tumor")
+        flux = flux.loc[keep]
+        meta = meta.loc[keep]
+    return flux, meta
 
 
 def paired_sample_state(matrix: pd.DataFrame, meta: pd.DataFrame, comparison: str) -> pd.DataFrame:
@@ -281,8 +289,11 @@ def paired_stats_from_sample_state(sample_state: pd.DataFrame) -> pd.DataFrame:
         normal = complete["Normal"].to_numpy()
         tumour = complete["Tumor"].to_numpy()
         try:
-            pvalue = wilcoxon(tumour, normal, alternative="two-sided").pvalue
+            test_result = wilcoxon(tumour, normal, alternative="two-sided")
+            statistic = float(test_result.statistic)
+            pvalue = float(test_result.pvalue)
         except ValueError:
+            statistic = 0.0
             pvalue = 1.0
         effect = float(np.median(tumour - normal)) if len(complete) else np.nan
         rows.append(
@@ -290,6 +301,7 @@ def paired_stats_from_sample_state(sample_state: pd.DataFrame) -> pd.DataFrame:
                 "feature": feature,
                 "effect_tumour_minus_normal": effect,
                 "p_value": pvalue,
+                "statistic": statistic,
                 "test": "paired Wilcoxon signed-rank",
                 "n_normal_samples": len(complete),
                 "n_tumour_samples": len(complete),
@@ -346,6 +358,9 @@ def extract_gatm_expression() -> tuple[pd.DataFrame, pd.DataFrame]:
             values = np.asarray(handle["layers"]["log1p"][:, gene_index["GATM"]]).ravel()[epithelial]
             meta = meta.loc[epithelial].copy()
             meta["GATM_log_expr"] = values
+        if dataset == "GSE184880":
+            keep = meta["group"].astype(str).eq("Tumor")
+            meta = meta.loc[keep].copy()
         sample_state = meta.groupby(["sample", "is_tumor_cell"], observed=False)["GATM_log_expr"].mean().unstack("is_tumor_cell")
         complete = sample_state.dropna(subset=["Normal", "Tumor"]).copy()
         complete["paired_difference_tumour_minus_normal"] = complete["Tumor"] - complete["Normal"]

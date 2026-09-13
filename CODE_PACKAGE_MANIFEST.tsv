@@ -7,9 +7,10 @@ scripts/lcms_preprocessing_qc/01_make_standard_curve_figures.py	Targeted standar
 scripts/lcms_preprocessing_qc/01_make_xic_figures.py	Targeted XIC figure generation	Derived from the targeted XIC figure-generation scripts.
 scripts/model_a_discovery_screening/load_and_use_model.py	Discovery N-vs-M model usage	Derived from the discovery-model analysis scripts.
 scripts/model_a_discovery_screening/MODEL_USAGE_GUIDE.md	Discovery model usage guide	Derived from the discovery-model documentation.
-scripts/model_b_ca125_plus_analyte/run_ModelB_CA125_8analyte_nested_cv.py	CA125-plus-analyte nested CV	Derived from the CA125-plus-analyte modelling scripts.
-scripts/model_b_ca125_plus_analyte/evaluate_ModelB_optimized_ensemble.py	CA125-plus-analyte optimized ensemble evaluation	Derived from the CA125-plus-analyte modelling scripts.
-scripts/model_b_ca125_plus_analyte/plot_ModelB_CA125_8analyte_publication.py	CA125-plus-analyte figure generation	Derived from the CA125-plus-analyte figure-generation scripts.
+scripts/model_b_ca125_plus_analyte/run_two_step_clinical_application_current.py	Two-step panel and CA125 clinical-application analysis	Current manuscript-aligned Step 2 model: six targeted analytes plus CA125 for B versus BD+M, development OOF thresholding and fixed temporal validation.
+scripts/model_b_ca125_plus_analyte/audit_step2_calibration_transport.py	Step 2 calibration and threshold-transport audit	Generates Brier score, calibration-in-the-large, calibration slope and threshold-transport summaries from authorised participant-level predictions.
+scripts/model_b_ca125_plus_analyte/README.md	Step 2 model usage guide	Documents the current endpoint, predictors, fixed settings and controlled-input boundary.
+scripts/model_b_ca125_plus_analyte/step2_model_specification.json	Step 2 fixed model specification	Machine-readable record of the endpoint, six analytes, regularisation, resampling, ensemble and fixed-threshold rules.
 scripts/model_c_targeted_panel/train_ModelC_nested_independent.py	Targeted-panel scoring, nested development and temporal same-centre validation	Derived from the targeted-panel modelling scripts; the legacy filename is retained for compatibility.
 scripts/model_c_targeted_panel/plot_ModelC_nested_independent_publication.py	Targeted-panel publication figure generation	Derived from the targeted-panel figure-generation scripts.
 scripts/single_cell_scrna/GSE217517_01_load.py	Single-cell data loading	Derived from the public single-cell preprocessing scripts.
@@ -20,6 +21,8 @@ scripts/scfea/01_prepare_scfea_inputs.py	scFEA epithelial-cell input preparation
 scripts/scfea/02_run_scfea.py	scFEA flux execution	Derived from the scFEA execution scripts.
 scripts/scfea/03_analyze_scfea_results.py	scFEA module-wide downstream analysis	Derived from the scFEA downstream-analysis scripts.
 scripts/scfea/06_make_focused_scfea_figures.py	scFEA focused figure generation	Derived from the scFEA figure-generation scripts.
+scripts/single_cell_pathway_activity/run_sample_level_four_pathway_paired_analysis.py	Sample-level single-cell pathway analysis	Current Fig. 6d sample-level paired pathway analysis for GSE217517 and GSE184880.
+scripts/single_cell_pathway_activity/plot_combined_four_pathway_half_violins.py	Single-cell pathway figure generation	Displays cell-level distributions with sample-level paired inferential annotations.
 scripts/public_omics_cptac_tcga/TCGA_00_run_publication_support.R	TCGA-OV GATM publication support	Derived from the TCGA-OV public-omics support scripts.
 scripts/public_omics_cptac_tcga/run_cptac_ov_tumor_vs_normal_kegg.py	CPTAC-OV proteomic pathway analysis	Derived from the CPTAC-OV public-omics support scripts.
 scripts/public_omics_cptac_tcga/export_individual_target_boxplots.py	CPTAC target-pathway figure generation	Derived from the CPTAC-OV figure-generation scripts.

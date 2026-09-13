@@ -1,6 +1,6 @@
 # Public-release privacy audit
 
-Release assessed: `v1.0.1`, 2026-09-02
+Release assessed: `v1.1.0`, 2026-09-13
 
 ## Included
 
